@@ -12,7 +12,6 @@ const getPendingCampaigns = async (req, res) => {
     const campaigns = await Campaign.find({ status: 'pending' })
       .populate('creatorId', 'name email')
       .sort({ createdAt: -1 });
-
     res.json(campaigns);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -157,7 +156,6 @@ const deleteCampaignByAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 //    Block/Unblock user
 //    PUT /api/admin/users/:id/block
 //   Private (Admin)
