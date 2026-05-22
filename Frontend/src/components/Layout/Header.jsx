@@ -89,7 +89,7 @@ function Header() {
                   Start a Fundraiser
                 </NavLink>
                 <NavLink
-                  to="/user-dashboard"
+                  to={user?.role === 'admin' ? '/admin-dashboard' : '/user-dashboard'}
                   className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-full text-sm font-medium transition-colors"
                 >
                   <User className="w-4 h-4" />
@@ -168,7 +168,7 @@ function Header() {
               {user ? (
                 <>
                   <NavLink
-                    to="/user-dashboard"
+                    to={user?.role === 'admin' ? '/admin-dashboard' : '/user-dashboard'}
                     onClick={() => setMobileMenuOpen(false)}
                     className="text-lg font-medium text-gray-800 py-2"
                   >

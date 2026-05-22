@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../store/axios.js';
+import useAuthStore from '../../store/authStore';
 import { ShieldAlert, IndianRupee, Megaphone, CheckCircle, XCircle, Activity, Trash2, Ban, UserCheck, Users } from 'lucide-react';
 import { cn } from "../../utils";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [pending, setPending] = useState([]);
   const [allCampaigns, setAllCampaigns] = useState([]);
   const [fraud, setFraud] = useState([]);
@@ -56,8 +60,14 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (!user) {
+      navigate('/login');
+    } else if (user.role !== 'admin') {
+      navigate('/user-dashboard');
+    } else {
+      fetchAll();
+    }
+  }, [user, navigate]);
 
   const showSuccess = (msg) => {
     setSuccessMsg(msg);

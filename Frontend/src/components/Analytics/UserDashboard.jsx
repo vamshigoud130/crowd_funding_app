@@ -62,9 +62,13 @@ const UserDashboard = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserCampaigns();
+      if (user.role === 'admin') {
+        navigate('/admin-dashboard');
+      } else {
+        fetchUserCampaigns();
+      }
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const handleSelectCampaign = async (campaign) => {
     setSelectedCampaign(campaign);

@@ -187,7 +187,7 @@ const CampaignDetails = () => {
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">
                   <Users className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-gray-900">{campaign.donors || 0}</p>
+                  <p className="text-xl font-bold text-gray-900">{campaign.donors ?? campaign.donorsCount ?? 0}</p>
                   <p className="text-xs text-gray-500 font-medium">Donors</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">

@@ -291,6 +291,34 @@ class EmailService {
       console.error('Error sending milestone update:', error);
     }
   }
+
+  // 8. Goal reached notification
+  async sendGoalReachedNotification(email, ownerName, campaignTitle, goalAmount) {
+    try {
+      const mailOptions = {
+        from: `"${brandName}" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `Campaign Goal Reached! 🎉 Campaign "${campaignTitle}" has hit its target!`,
+        html: emailWrapper(`
+          <h2 style="color:#111827;margin:0 0 16px;font-size:22px;">Congratulations, ${ownerName}! 🥳🏆</h2>
+          <p style="color:#4b5563;font-size:15px;line-height:1.7;margin:0 0 16px;">
+            Incredible news! Your campaign <strong>"${campaignTitle}"</strong> has successfully reached its fundraising goal of <strong>₹${Number(goalAmount).toLocaleString('en-IN')}</strong>!
+          </p>
+          <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:20px;margin-bottom:16px;text-align:center;">
+            <p style="margin:0;color:#065f46;font-size:13px;text-transform:uppercase;letter-spacing:1px;">Goal Achieved</p>
+            <p style="margin:8px 0 0;color:${brandColor};font-size:32px;font-weight:800;">₹${Number(goalAmount).toLocaleString('en-IN')}</p>
+          </div>
+          <p style="color:#4b5563;font-size:15px;line-height:1.7;margin:0 0 24px;">
+            Thank you for your incredible effort and dedication to making a difference. You can now manage your campaign updates and milestone releases from your dashboard.
+          </p>
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/user-dashboard" style="display:inline-block;background:${brandColor};color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Go to Dashboard →</a>
+        `)
+      };
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending goal reached notification:', error);
+    }
+  }
 }
 
 export default new EmailService();

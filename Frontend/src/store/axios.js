@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://crowd-funding-app.onrender.com/api"
+  baseURL: typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5000/api"
+    : "https://crowd-funding-app.onrender.com/api"
 });
 
 /*

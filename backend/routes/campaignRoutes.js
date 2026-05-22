@@ -5,7 +5,8 @@ import {
   createCampaign,
   updateCampaign,
   deleteCampaign,
-  getUserCampaigns
+  getUserCampaigns,
+  getPublicStats
 } from '../controllers/campaignController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getCampaigns);
+router.get('/stats', getPublicStats);
 router.get('/user/:userId', getUserCampaigns);
 router.get('/:id', getCampaign);
 

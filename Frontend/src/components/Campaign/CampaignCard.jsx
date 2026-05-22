@@ -62,7 +62,7 @@ function CampaignCard({ campaign, onClick }) {
           <div className="flex items-center justify-between text-xs text-gray-500 font-medium pt-2 border-t border-gray-100">
             <div className="flex items-center gap-1.5">
               <Users className="w-4 h-4 text-gray-400" />
-              <span>{campaign.donorsCount || Math.floor(Math.random() * 50) + 5} Donors</span>
+              <span>{campaign.donorsCount ?? campaign.donors ?? 0} Donors</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-gray-400" />

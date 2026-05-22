@@ -1,134 +1,107 @@
-# Crowdfunding Platform Backend
+# CrowdFund Backend Server
 
-A comprehensive MERN stack backend for a crowdfunding platform with advanced features like trust scoring, fraud detection, real-time updates, and analytics.
+This is the Node.js/Express API server for the CrowdFund platform. It handles user authentication, database operations with MongoDB, payment integration, trust scoring, fraud detection, mail distribution, and real-time updates via WebSockets.
 
-## Features
+---
 
-- **User Authentication & Authorization** - JWT-based auth with role-based access
-- **Campaign Management** - Create, approve, and manage crowdfunding campaigns
-- **Donation System** - Secure donation processing with real-time updates
-- **Trust Score System** - Automated trust scoring for campaign creators
-- **Fraud Detection** - AI-powered fraud detection algorithms
-- **Real-time Updates** - Socket.io for live donation feeds
-- **Analytics Dashboard** - Comprehensive analytics for admins and creators
-- **Milestone-based Funding** - Transparent fund release system
-- **Referral System** - Viral sharing with referral tracking
-- **Email Notifications** - Automated email system for important events
+## 🚀 Key Features
 
-## Tech Stack
+*   **Secure Authentication**: JWT validation with HTTPOnly cookie options and middleware-level role verification.
+*   **Trust Scoring System**: Automated score generation calculating account age, campaign activity, and feedback metrics.
+*   **AI-Powered Fraud Flagging**: Real-time evaluation of campaign titles and descriptions to detect patterns matching suspicious activity.
+*   **Real-time Event Push**: WebSockets (Socket.io) broadcasting donation events and raising campaign funds instantly across active clients.
+*   **API Security**: Features Helmet header masking, CORS setup, rate limiting, and inputs/parameters validator.
+*   **Mail service**: Automated transactional emails using Nodemailer (for registering campaigns, milestone creation, etc.).
 
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - ODM for MongoDB
-- **Socket.io** - Real-time communication
-- **JWT** - Authentication
-- **Bcrypt** - Password hashing
-- **Cloudinary** - Media storage
-- **Nodemailer** - Email service
+---
 
-## Installation
+## 🛠️ Tech Stack
 
-1. Clone the repository
-2. Install dependencies:
+*   **Runtime & Server**: Node.js, Express.js
+*   **Database**: MongoDB Atlas via Mongoose ODM
+*   **Real-time Communication**: Socket.io
+*   **Authentication & Hashing**: JSON Web Tokens (JWT), Bcrypt.js
+*   **Cloud Storage**: Multer, Cloudinary Integration
+*   **Email Notification**: Nodemailer
+*   **Payments Integration**: Razorpay API
+
+---
+
+## ⚙️ Project Structure
+
+```text
+backend/
+├── config/              # Configuration files (Database, Cloudinary, Socket)
+├── controllers/         # Handler functions (Campaign, Donation, Auth, Admin)
+├── middleware/          # Security, token verification, and role checks
+├── models/              # MongoDB schemas (User, Campaign, Donation, FraudLog, Milestone, Update)
+├── routes/              # Express API route endpoints
+├── services/            # Automated services (Fraud detection, Trust score)
+├── utils/               # Utility modules (Email templates)
+└── server.js            # Node app entry point
+```
+
+---
+
+## 🏃 Local Run & Install
+
+1. Install project dependencies:
    ```bash
    npm install
    ```
-3. Create a `.env` file based on `.env.example`
-4. Start the development server:
+2. Set up environment configuration:
+   * Create a `.env` file in the root of the `backend` directory.
+   * Add the following configuration variables:
+     ```env
+     PORT=5000
+     MONGO_URI=mongodb+srv://your-mongodb-connection-uri
+     JWT_SECRET=your_secret_jwt_string_key
+     
+     # Media files storage (Cloudinary)
+     CLOUDINARY_CLOUD_NAME=your_cloud_name
+     CLOUDINARY_API_KEY=your_api_key
+     CLOUDINARY_API_SECRET=your_api_secret
+
+     # Nodemailer Config
+     EMAIL_HOST=smtp.gmail.com
+     EMAIL_PORT=587
+     EMAIL_USER=your_gmail_address
+     EMAIL_PASS=your_gmail_app_password
+     ```
+3. Start the dev server using nodemon:
    ```bash
    npm run dev
    ```
 
-## API Endpoints
+---
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
-- `PUT /api/auth/profile` - Update user profile
+## 📡 API Routing Reference
 
-### Campaigns
-- `GET /api/campaigns` - Get all campaigns
-- `GET /api/campaigns/:id` - Get single campaign
-- `POST /api/campaigns` - Create campaign
-- `PUT /api/campaigns/:id` - Update campaign
-- `DELETE /api/campaigns/:id` - Delete campaign
+### 👤 User Authentication
+*   `POST /api/auth/register` - Create user account
+*   `POST /api/auth/login` - User login
+*   `POST /api/auth/logout` - Logout current session
+*   `GET /api/auth/profile` - Fetch current user profile
+*   `PUT /api/auth/profile` - Update user settings
 
-### Donations
-- `POST /api/donations` - Create donation
-- `GET /api/donations/campaign/:campaignId` - Get campaign donations
-- `GET /api/donations/user/:userId` - Get user donations
+### 📢 Campaigns
+*   `GET /api/campaigns` - List approved campaigns (support sorting, category filtering, search)
+*   `GET /api/campaigns/stats` - Public analytics (funded count, total raised, unique donors)
+*   `GET /api/campaigns/:id` - Campaign by ID (includes donor counts)
+*   `POST /api/campaigns` - Create a campaign (private)
+*   `PUT /api/campaigns/:id` - Edit campaign info (private)
+*   `DELETE /api/campaigns/:id` - Delete campaign (private)
+*   `GET /api/campaigns/user/:userId` - Fetch campaigns created by user
 
-### Admin
-- `GET /api/admin/campaigns/pending` - Get pending campaigns
-- `PUT /api/admin/campaigns/:id/approve` - Approve campaign
-- `PUT /api/admin/campaigns/:id/reject` - Reject campaign
-- `GET /api/admin/fraud-logs` - Get fraud logs
+### 💳 Donations
+*   `POST /api/donations` - Record a new donation (private)
+*   `GET /api/donations/campaign/:campaignId` - List donations for a campaign
+*   `GET /api/donations/user/:userId` - List user's contribution history
 
-### Analytics
-- `GET /api/analytics/dashboard` - Get dashboard data
-- `GET /api/analytics/campaigns/:id` - Get campaign analytics
-
-## Database Schema
-
-### User
-- name, email, password, role, profileImage, verified
-- createdCampaigns, donations, referralCode
-
-### Campaign
-- title, description, category, goalAmount, currentAmount
-- deadline, creatorId, images, documents, status, trustScore
-- stretchGoals, impactUnit
-
-### Donation
-- donorId, campaignId, amount, anonymous, paymentId
-- referralId, message
-
-### Milestone
-- campaignId, title, amount, status, verificationDocuments
-
-### Update
-- campaignId, title, description, media
-
-### FraudLog
-- campaignId, riskScore, reasons, status
-
-## Security Features
-
-- JWT authentication
-- Password hashing with bcrypt
-- Rate limiting
-- Input validation
-- Role-based access control
-- CORS protection
-- Helmet security headers
-
-## Real-time Features
-
-- Live donation updates
-- Campaign progress tracking
-- Real-time notifications
-
-## Deployment
-
-The backend is designed to be deployed on:
-- **Heroku** / **Railway** / **Render** for the server
-- **MongoDB Atlas** for the database
-- **Cloudinary** for media storage
-
-## Environment Variables
-
-See `.env.example` for required environment variables.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
+### 🛡️ Administration (Admin Role Required)
+*   `GET /api/admin/campaigns/pending` - Pending campaign queue
+*   `PUT /api/admin/campaigns/:id/approve` - Approve campaign
+*   `PUT /api/admin/campaigns/:id/reject` - Reject campaign
+*   `GET /api/admin/fraud-logs` - View security logs
+*   `GET /api/admin/users` - View all users
+*   `PUT /api/admin/users/:userId/block` - Toggle account block status

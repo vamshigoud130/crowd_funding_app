@@ -142,6 +142,18 @@ const verifyPayment = async (req, res) => {
       ).catch(err => {
         console.error('Failed to send donation received notification:', err);
       });
+
+      // Send goal reached notification if goal amount is reached
+      if (campaign.currentAmount >= campaign.goalAmount) {
+        emailService.sendGoalReachedNotification(
+          campaignOwner.email,
+          campaignOwner.name,
+          campaign.title,
+          campaign.goalAmount
+        ).catch(err => {
+          console.error('Failed to send goal reached notification:', err);
+        });
+      }
     }
 
     res.status(201).json({
@@ -222,6 +234,18 @@ const createDonation = async (req, res) => {
       ).catch(err => {
         console.error('Failed to send donation received notification:', err);
       });
+
+      // Send goal reached notification if goal amount is reached
+      if (campaign.currentAmount >= campaign.goalAmount) {
+        emailService.sendGoalReachedNotification(
+          campaignOwner.email,
+          campaignOwner.name,
+          campaign.title,
+          campaign.goalAmount
+        ).catch(err => {
+          console.error('Failed to send goal reached notification:', err);
+        });
+      }
     }
 
     res.status(201).json(donation);

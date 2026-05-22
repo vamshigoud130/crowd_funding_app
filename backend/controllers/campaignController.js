@@ -6,6 +6,37 @@ import cloudinary from '../config/cloudinary.js';
 import trustScoreService from '../services/trustScoreService.js';
 import fraudDetectionService from '../services/fraudDetectionService.js';
 import emailService from '../utils/emailSender.js';
+import Donation from '../models/Donation.js';
+
+// Helpers to attach unique donors count to campaigns
+const attachDonorsCountToCampaign = async (campaign) => {
+  if (!campaign) return campaign;
+  const plainCampaign = campaign.toObject ? campaign.toObject() : campaign;
+  const uniqueDonors = await Donation.distinct('donorId', { campaignId: campaign._id });
+  plainCampaign.donorsCount = uniqueDonors.length;
+  plainCampaign.donors = uniqueDonors.length;
+  return plainCampaign;
+};
+
+const attachDonorsCountToCampaigns = async (campaigns) => {
+  if (!campaigns || campaigns.length === 0) return campaigns;
+  const campaignIds = campaigns.map(c => c._id);
+  const donationStats = await Donation.aggregate([
+    { $match: { campaignId: { $in: campaignIds } } },
+    { $group: { _id: '$campaignId', uniqueDonors: { $addToSet: '$donorId' } } }
+  ]);
+  const statsMap = {};
+  donationStats.forEach(stat => {
+    statsMap[stat._id.toString()] = stat.uniqueDonors.length;
+  });
+  return campaigns.map(campaign => {
+    const plainCampaign = campaign.toObject ? campaign.toObject() : campaign;
+    const count = statsMap[campaign._id.toString()] || 0;
+    plainCampaign.donorsCount = count;
+    plainCampaign.donors = count;
+    return plainCampaign;
+  });
+};
 
 // Helpers
 const uploadImageIfNeeded = async (imageData) => {
@@ -51,8 +82,10 @@ const getCampaigns = async (req, res) => {
 
     const total = await Campaign.countDocuments(query);
 
+    const enrichedCampaigns = await attachDonorsCountToCampaigns(campaigns);
+
     res.json({
-      campaigns,
+      campaigns: enrichedCampaigns,
       totalPages: Math.ceil(total / limit),
       currentPage: page
     });
@@ -73,7 +106,8 @@ const getCampaign = async (req, res) => {
       return res.status(404).json({ message: 'Campaign not found' });
     }
 
-    res.json(campaign);
+    const enrichedCampaign = await attachDonorsCountToCampaign(campaign);
+    res.json(enrichedCampaign);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -247,7 +281,37 @@ const getUserCampaigns = async (req, res) => {
     const campaigns = await Campaign.find({ creatorId: req.params.userId })
       .sort({ createdAt: -1 });
 
-    res.json(campaigns);
+    const enrichedCampaigns = await attachDonorsCountToCampaigns(campaigns);
+    res.json(enrichedCampaigns);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get public application statistics
+// @route   GET /api/campaigns/stats
+// @access  Public
+const getPublicStats = async (req, res) => {
+  try {
+    const totalCampaigns = await Campaign.countDocuments({ status: { $in: ['approved', 'completed'] } });
+    
+    // Calculate total raised amount across all campaigns
+    const campaigns = await Campaign.find({ status: { $in: ['approved', 'completed'] } });
+    const totalRaised = campaigns.reduce((acc, c) => acc + (c.currentAmount || 0), 0);
+
+    // Count of unique donors across all donations
+    const uniqueDonors = await Donation.distinct('donorId');
+    const totalDonors = uniqueDonors.length;
+
+    // Estimate lives impacted based on total donors and campaigns
+    const livesImpacted = Math.max(0, totalDonors * 3 + totalCampaigns * 5);
+
+    res.json({
+      campaignsCount: totalCampaigns,
+      totalRaised,
+      totalDonors,
+      livesImpacted
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -259,5 +323,6 @@ export {
   createCampaign,
   updateCampaign,
   deleteCampaign,
-  getUserCampaigns
+  getUserCampaigns,
+  getPublicStats
 };

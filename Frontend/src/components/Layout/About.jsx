@@ -1,17 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from '../../store/axios.js';
 
 function About() {
   const team = [
-    { name: "Arjun Mehta",  role: "Founder & CEO",       emoji: "👨‍💼" },
-    { name: "Priya Sharma", role: "Head of Campaigns",    emoji: "👩‍💻" },
-    { name: "Rahul Verma",  role: "Community Manager",    emoji: "🤝" },
+    { name: "Vamshi & Harish",  role: "Backend & Security Engineer",       emoji: "👨💼" },
+    { name: " Deekshitha ",  role: "UI/UX Designer",    emoji: "🎨" },
+    { name: "Bhavya", role: "Head of Campaigns",    emoji: "👩💻" },
+    { name: "Tannistha Mishra",  role: "Community Manager",    emoji: "🤝" }
   ];
 
+  const [statsData, setStatsData] = useState({
+    campaignsCount: 0,
+    totalRaised: 0,
+    totalDonors: 0,
+    livesImpacted: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get('/campaigns/stats');
+        setStatsData(res.data);
+      } catch (err) {
+        console.error("Failed to load statistics:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { label: "Campaigns Funded", value: "1,200+" },
-    { label: "Total Raised",     value: "₹4.8Cr+" },
-    { label: "Donors Worldwide", value: "32,000+" },
-    { label: "Lives Impacted",   value: "1,00,000+" },
+    { label: "Campaigns Funded", value: loading ? "..." : `${statsData.campaignsCount}` },
+    { label: "Total Raised",     value: loading ? "..." : `₹${statsData.totalRaised.toLocaleString('en-IN')}` },
+    { label: "Donors Worldwide", value: loading ? "..." : `${statsData.totalDonors}` },
+    { label: "Lives Impacted",   value: loading ? "..." : `${statsData.livesImpacted}` },
   ];
 
   const steps = [
@@ -58,10 +82,10 @@ function About() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-xl shadow-sm p-6 text-center border border-gray-100"
+              className="bg-white rounded-2xl shadow-sm p-6 text-center border border-indigo-50 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
             >
-              <p className="text-3xl font-bold text-indigo-600">{stat.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+              <p className="text-3xl font-extrabold text-indigo-600 tracking-tight">{stat.value}</p>
+              <p className="text-sm font-medium text-gray-500 mt-2">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -90,15 +114,26 @@ function About() {
         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-8">
           Meet the Team
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {team.map((member) => (
             <div
               key={member.name}
-              className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100 space-y-2"
+              className="bg-white rounded-2xl shadow-sm p-8 text-center border border-indigo-50 space-y-4 transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
             >
-              <div className="text-5xl">{member.emoji}</div>
-              <p className="font-semibold text-gray-800">{member.name}</p>
-              <p className="text-sm text-gray-500">{member.role}</p>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="w-20 h-20 mx-auto rounded-full bg-indigo-50 flex items-center justify-center text-4xl transform group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                {member.emoji}
+              </div>
+              
+              <div className="space-y-1">
+                <p className="font-bold text-gray-800 text-lg group-hover:text-indigo-600 transition-colors duration-200">
+                  {member.name}
+                </p>
+                <p className="text-xs font-semibold tracking-wider text-indigo-500 uppercase">
+                  {member.role}
+                </p>
+              </div>
             </div>
           ))}
         </div>
