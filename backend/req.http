@@ -8,8 +8,6 @@ Content-Type: application/json
   "password": "password123"
 }
 
-###
-
 ### Login User
 POST http://localhost:5000/api/auth/login
 Content-Type: application/json
@@ -18,8 +16,6 @@ Content-Type: application/json
   "email": "23eg111@anurag.edu.in",
   "password": "password123"
 }
-
-###
 
 ### Create Admin User (First Time Setup)
 POST http://localhost:5000/api/auth/register
