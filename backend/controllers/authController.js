@@ -5,7 +5,7 @@ import emailService from '../utils/emailSender.js';
 import crypto from 'crypto';
 
 // Generate JWT token
-const requireVerification = process.env.NODE_ENV === 'production' || process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
+const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', {
