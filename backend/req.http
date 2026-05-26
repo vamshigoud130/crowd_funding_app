@@ -23,7 +23,7 @@ Content-Type: application/json
 
 {
   "name": "Admin User",
-  "email": "admin@example.com",
+  "email": "impactfunds1@gmail.com",
   "password": "admin123",
   "role": "admin"
 }
