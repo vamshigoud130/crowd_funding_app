@@ -48,7 +48,7 @@ export default function DonationFeed({ campaignId }) {
                         <div className="flex justify-between items-center">
                             <span className="text-xl font-bold text-emerald-600">₹{donation.amount?.toLocaleString()}</span>
                             <span className="text-sm text-gray-500 font-medium">
-                                {donation.anonymous ? 'Anonymous' : donation.donorId?.name || 'Supporter'}
+                                {donation.anonymous ? 'Anonymous' : (donation.donorId?.name || donation.guestName || 'Supporter')}
                             </span>
                         </div>
                         {donation.message && (

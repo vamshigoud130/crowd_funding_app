@@ -53,7 +53,7 @@ function CampaignList() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-            {isSuccessStories ? "Success Stories" : "Discover Campaigns"} <Sparkles className="w-6 h-6 text-emerald-500" />
+            {isSuccessStories ? "Success Stories" : "Discover Campaigns"} 
           </h1>
           <p className="text-gray-500">
             {isSuccessStories ? "Campaigns that have successfully reached their goals thanks to you." : "Support a cause you care about today."}

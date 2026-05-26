@@ -26,6 +26,8 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
 
   const { user } = useAuthStore();
   const predefinedAmounts = [500, 1000, 2500, 5000];
@@ -42,8 +44,19 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
     }
 
     if (!user) {
-      setError("Please login to make a donation");
-      return;
+      if (!guestEmail) {
+        setError("Email address is required for donation receipt");
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestEmail)) {
+        setError("Please enter a valid email address");
+        return;
+      }
+      if (!anonymous && !guestName) {
+        setError("Full Name is required (or select 'Donate Anonymously')");
+        return;
+      }
     }
 
     if (Number(amount) > (goalAmount || 0)) {
@@ -84,8 +97,8 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
         description: `Donation to "${orderData.campaignTitle || campaignTitle}"`,
         order_id: orderData.orderId,
         prefill: {
-          name: user.name || "",
-          email: user.email || "",
+          name: user ? (user.name || "") : (guestName || ""),
+          email: user ? (user.email || "") : (guestEmail || ""),
         },
         theme: {
           color: "#059669",
@@ -101,6 +114,8 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
               amount: Number(amount),
               message,
               anonymous,
+              guestName: user ? undefined : guestName,
+              guestEmail: user ? undefined : guestEmail
             });
 
             setPaymentSuccess(true);
@@ -159,7 +174,7 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
             Your donation of <span className="font-bold text-emerald-600">₹{Number(amount || 0).toLocaleString()}</span> has been processed successfully.
           </p>
           <p className="text-sm text-gray-400">
-            A confirmation email has been sent to your registered email.
+            A confirmation email has been sent to {user ? "your registered email" : guestEmail}.
           </p>
         </div>
       </div>
@@ -218,6 +233,42 @@ function DonationForm({ campaignId, campaignTitle, goalAmount, currentAmount, on
             />
           </div>
         </div>
+
+        {/* Guest Information */}
+        {!user && (
+          <div className="space-y-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100 animate-fadeIn">
+            <h4 className="font-bold text-gray-800 text-sm">Donor Information (Guest)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  Full Name {!anonymous && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="text"
+                  placeholder="name"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400">
+              We require your email address to send your payment receipt and donation confirmation.
+            </p>
+          </div>
+        )}
 
         {error && (
           <p className="text-red-500 text-sm font-medium bg-red-50 border border-red-100 rounded-lg px-4 py-3 flex items-center gap-2">

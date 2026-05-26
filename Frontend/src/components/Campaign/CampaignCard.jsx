@@ -29,9 +29,9 @@ function CampaignCard({ campaign, onClick }) {
           alt={campaign.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 text-emerald-700 shadow-sm">
+        {/* <div className="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 text-emerald-700 shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5" /> Tax Benefit
-        </div>
+        </div> */}
         {campaign.isUrgent && (
           <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm animate-pulse">
             Urgent

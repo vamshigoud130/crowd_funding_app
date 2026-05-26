@@ -362,7 +362,7 @@ const UserDashboard = () => {
                       <div key={d._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                         <div>
                           <p className="font-bold text-gray-900">
-                            {d.anonymous ? "Anonymous" : (d.donorId?.name || "Supporter")}
+                            {d.anonymous ? "Anonymous" : (d.donorId?.name || d.guestName || "Supporter")}
                           </p>
                           {d.message && <p className="text-sm text-gray-500 mt-1 italic">"{d.message}"</p>}
                           <p className="text-xs text-gray-400 mt-1">

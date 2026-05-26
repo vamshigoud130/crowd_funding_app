@@ -319,6 +319,44 @@ class EmailService {
       console.error('Error sending goal reached notification:', error);
     }
   }
+
+  // 9. Send verification email
+  async sendVerificationEmail(email, name, token) {
+    try {
+      const verifyUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email/${token}`;
+      const mailOptions = {
+        from: `"${brandName}" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `Verify your email for ${brandName} 🔐`,
+        html: emailWrapper(`
+          <h2 style="color:#111827;margin:0 0 16px;font-size:22px;">Hello ${name},</h2>
+          <p style="color:#4b5563;font-size:15px;line-height:1.7;margin:0 0 16px;">
+            Thank you for registering on <strong>${brandName}</strong>. Please click the button below to verify your email address and activate your account:
+          </p>
+          <div style="text-align:center;margin:30px 0;">
+            <a href="${verifyUrl}" style="display:inline-block;background:${brandColor};color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(5,150,105,0.2);">Verify Email Address</a>
+          </div>
+          <p style="color:#4b5563;font-size:14px;line-height:1.7;margin:0 0 10px;">
+            If the button doesn't work, copy and paste this URL into your browser:
+          </p>
+          <p style="color:#6b7280;font-size:13px;word-break:break-all;background:#f3f4f6;padding:12px;border-radius:8px;">
+            ${verifyUrl}
+          </p>
+          <p style="color:#9ca3af;font-size:13px;margin:20px 0 0;">
+            If you did not create this account, you can safely ignore this email.
+          </p>
+        `)
+      };
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending email verification link:', error);
+      const verifyUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email/${token}`;
+      console.log(`\n==================================================`);
+      console.log(`[DEVELOPMENT FALLBACK] Verification link for ${email}:`);
+      console.log(`${verifyUrl}`);
+      console.log(`==================================================\n`);
+    }
+  }
 }
 
 export default new EmailService();

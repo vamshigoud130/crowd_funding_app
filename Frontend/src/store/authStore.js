@@ -35,8 +35,9 @@ const useAuthStore = create(
                     set({ loading: false });
                     return res.data;
                 } catch (err) {
+                    const errorMsg = err.response?.data?.errors?.[0]?.msg || err.response?.data?.message || "Registration failed.";
                     set({
-                        error: err.response?.data?.message || "Registration failed.",
+                        error: errorMsg,
                         loading: false,
                     });
                     return null;
@@ -47,9 +48,12 @@ const useAuthStore = create(
                 localStorage.removeItem("token");
                 set({ user: null, error: null });
             },
+
+            clearError: () => set({ error: null }),
         }),
         {
             name: 'auth-storage',
+            partialize: (state) => ({ user: state.user }),
         }
     )
 );

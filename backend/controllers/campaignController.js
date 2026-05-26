@@ -288,9 +288,9 @@ const getUserCampaigns = async (req, res) => {
   }
 };
 
-// @desc    Get public application statistics
-// @route   GET /api/campaigns/stats
-// @access  Public
+//    Get public application statistics
+//   GET /api/campaigns/stats
+//  Public
 const getPublicStats = async (req, res) => {
   try {
     const totalCampaigns = await Campaign.countDocuments({ status: { $in: ['approved', 'completed'] } });

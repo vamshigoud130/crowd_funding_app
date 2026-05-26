@@ -1,6 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import useAuthStore from '../../store/authStore';
+
+const BLOCKED_DOMAINS = [
+  'yopmail.com', 'yopmail.fr', 'yopmail.net', 'cool.fr.nf', 'jetable.org',
+  'mailinator.com', 'tempmail.com', '10minutemail.com', 'sharklasers.com', 
+  'guerrillamail.com', 'dispostable.com', 'getairmail.com', 'maildrop.cc', 
+  'trashmail.com', 'burnermail.io', 'tempmail.net', 'example.com', 'test.com', 
+  'invalid.com', 'domain.com', 'mock.com', 'spambog.com', 'mailcatch.com', 
+  'mailexpire.com', 'mailness.com'
+];
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,10 +19,17 @@ const Register = () => {
     confirmPassword: ''
   });
 
-  const { register, error, loading } = useAuthStore();
+  const { register, error, loading, clearError } = useAuthStore();
   const navigate = useNavigate();
 
+  // Clear any leftover errors when this page loads
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
   const handleChange = (e) => {
+    // Dismiss error banner as soon as user starts correcting input
+    if (error) clearError();
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -22,6 +38,11 @@ const Register = () => {
 
     if (formData.password !== formData.confirmPassword) {
       return useAuthStore.setState({ error: "Passwords do not match" });
+    }
+
+    const emailDomain = formData.email.split('@')[1];
+    if (emailDomain && BLOCKED_DOMAINS.includes(emailDomain.toLowerCase())) {
+      return useAuthStore.setState({ error: "Registration with disposable or test email addresses is not allowed" });
     }
 
     const { confirmPassword, ...registerData } = formData;
@@ -45,7 +66,7 @@ const Register = () => {
               type="text"
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
-              placeholder="John Doe"
+              placeholder="name"
               onChange={handleChange}
             />
           </div>
@@ -57,7 +78,7 @@ const Register = () => {
               type="email"
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
-              placeholder="john@example.com"
+              placeholder="name@example.com"
               onChange={handleChange}
             />
           </div>

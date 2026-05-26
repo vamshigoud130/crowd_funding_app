@@ -8,7 +8,7 @@ import crypto from 'crypto';
 
 //   Create Razorpay order
 //   POST /api/donations/create-order
-//  Private
+//  Private/Public (Optional Auth)
 const createOrder = async (req, res) => {
   try {
     const { amount, campaignId } = req.body;
@@ -39,7 +39,7 @@ const createOrder = async (req, res) => {
       receipt: `rcpt_${Date.now()}`,
       notes: {
         campaignId: campaignId,
-        donorId: req.user._id.toString(),
+        donorId: req.user ? req.user._id.toString() : 'guest',
         campaignTitle: campaign.title
       }
     };
@@ -61,7 +61,7 @@ const createOrder = async (req, res) => {
 
 //     Verify Razorpay payment and create donation
 //    POST /api/donations/verify-payment
-//   Private
+//   Private/Public (Optional Auth)
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -71,7 +71,9 @@ const verifyPayment = async (req, res) => {
       campaignId,
       amount,
       message,
-      anonymous
+      anonymous,
+      guestName,
+      guestEmail
     } = req.body;
 
     // Verify signature
@@ -96,42 +98,59 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: 'Campaign goal already reached.' });
     }
 
-    const donation = await Donation.create({
-      donorId: req.user._id,
+    const donationData = {
       campaignId,
       amount,
       anonymous: anonymous || false,
       paymentId: razorpay_payment_id,
       message
-    });
+    };
+
+    if (req.user) {
+      donationData.donorId = req.user._id;
+    } else {
+      donationData.guestName = guestName;
+      donationData.guestEmail = guestEmail;
+    }
+
+    const donation = await Donation.create(donationData);
 
     // Update campaign current amount
     campaign.currentAmount += amount;
     await campaign.save();
 
-    // Add to user's donations
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: { donations: donation._id }
-    });
+    // Add to user's donations (only if logged in)
+    if (req.user) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { donations: donation._id }
+      });
+    }
+
+    // Determine display name for real-time and notification updates
+    const donorDisplayName = anonymous ? 'Anonymous' : (req.user ? req.user.name : (guestName || 'Supporter'));
 
     // Emit real-time update
     const io = getIO();
     io.to(campaignId).emit('donationMade', {
       campaignId,
       amount,
-      donorName: anonymous ? 'Anonymous' : req.user.name,
+      donorName: donorDisplayName,
       totalAmount: campaign.currentAmount
     });
 
     // Send donation confirmation email to donor
-    emailService.sendDonationConfirmation(req.user.email, req.user.name, campaign.title, amount).catch(err => {
-      console.error('Failed to send donation confirmation:', err);
-    });
+    const targetEmail = req.user ? req.user.email : guestEmail;
+    const targetName = req.user ? req.user.name : (guestName || 'Supporter');
+
+    if (targetEmail) {
+      emailService.sendDonationConfirmation(targetEmail, targetName, campaign.title, amount).catch(err => {
+        console.error('Failed to send donation confirmation:', err);
+      });
+    }
 
     // Notify campaign owner about the new donation
     const campaignOwner = await User.findById(campaign.creatorId);
     if (campaignOwner && campaignOwner.email) {
-      const donorDisplayName = anonymous ? 'Anonymous' : req.user.name;
       emailService.sendDonationReceivedNotification(
         campaignOwner.email,
         campaignOwner.name,
@@ -169,10 +188,10 @@ const verifyPayment = async (req, res) => {
 
 //     Create donation (legacy/fallback without Razorpay)
 //    POST /api/donations
-//   Private
+//   Private/Public (Optional Auth)
 const createDonation = async (req, res) => {
   try {
-    const { campaignId, amount, anonymous, paymentId, referralId, message } = req.body;
+    const { campaignId, amount, anonymous, paymentId, referralId, message, guestName, guestEmail } = req.body;
 
     const campaign = await Campaign.findById(campaignId);
     if (!campaign) {
@@ -187,43 +206,60 @@ const createDonation = async (req, res) => {
       return res.status(400).json({ message: 'This campaign has already reached its goal.' });
     }
 
-    const donation = await Donation.create({
-      donorId: req.user._id,
+    const donationData = {
       campaignId,
       amount,
       anonymous: anonymous || false,
       paymentId,
       referralId,
       message
-    });
+    };
+
+    if (req.user) {
+      donationData.donorId = req.user._id;
+    } else {
+      donationData.guestName = guestName;
+      donationData.guestEmail = guestEmail;
+    }
+
+    const donation = await Donation.create(donationData);
 
     // Update campaign current amount
     campaign.currentAmount += amount;
     await campaign.save();
 
-    // Add to user's donations
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: { donations: donation._id }
-    });
+    // Add to user's donations (only if logged in)
+    if (req.user) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { donations: donation._id }
+      });
+    }
+
+    // Determine display name
+    const donorDisplayName = anonymous ? 'Anonymous' : (req.user ? req.user.name : (guestName || 'Supporter'));
 
     // Emit real-time update
     const io = getIO();
     io.to(campaignId).emit('donationMade', {
       campaignId,
       amount,
-      donorName: anonymous ? 'Anonymous' : req.user.name,
+      donorName: donorDisplayName,
       totalAmount: campaign.currentAmount
     });
 
     // Send donation confirmation email to donor
-    emailService.sendDonationConfirmation(req.user.email, req.user.name, campaign.title, amount).catch(err => {
-      console.error('Failed to send donation confirmation:', err);
-    });
+    const targetEmail = req.user ? req.user.email : guestEmail;
+    const targetName = req.user ? req.user.name : (guestName || 'Supporter');
+
+    if (targetEmail) {
+      emailService.sendDonationConfirmation(targetEmail, targetName, campaign.title, amount).catch(err => {
+        console.error('Failed to send donation confirmation:', err);
+      });
+    }
 
     // Notify campaign owner about the new donation
     const campaignOwner = await User.findById(campaign.creatorId);
     if (campaignOwner && campaignOwner.email) {
-      const donorDisplayName = anonymous ? 'Anonymous' : req.user.name;
       emailService.sendDonationReceivedNotification(
         campaignOwner.email,
         campaignOwner.name,

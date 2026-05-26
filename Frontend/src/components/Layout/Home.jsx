@@ -32,16 +32,12 @@ function Home() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              // initial={{ opacity: 0, y: 30 }}
+              // animate={{ opacity: 1, y: 0 }}
+              // transition={{ duration: 0.6 }}
               className="lg:w-1/2 space-y-8 text-center lg:text-left"
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-800 font-medium text-sm">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
                 0% Platform Fee for Medical Emergencies
               </div>
               
@@ -98,21 +94,6 @@ function Home() {
                   <p className="text-emerald-300 text-sm mt-1">- Rajesh Kumar</p>
                 </div>
               </div>
-
-              {/* Floating Stat Card */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl flex items-center gap-4 border border-gray-100"
-              >
-                <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Community</p>
-                  <p className="text-xl font-bold text-gray-900">20 Lakh+ Donors</p>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>

@@ -4,7 +4,13 @@ const donationSchema = new mongoose.Schema({
   donorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
+  },
+  guestName: {
+    type: String
+  },
+  guestEmail: {
+    type: String
   },
   campaignId: {
     type: mongoose.Schema.Types.ObjectId,

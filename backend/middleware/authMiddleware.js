@@ -35,6 +35,31 @@ const protect = async (req, res, next) => {
   return res.status(401).json({ message: 'Not authorized, no token' });
 };
 
+// Optional protection - authenticate if token is present, but don't require it
+const protectOptional = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(' ')[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+
+      // Get user from token
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch (error) {
+      console.log('Optional auth error:', error.message);
+    }
+  }
+
+  next();
+};
+
 // Admin middleware - require admin role
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
@@ -44,4 +69,4 @@ const admin = (req, res, next) => {
   }
 };
 
-export { protect, admin };
+export { protect, protectOptional, admin };

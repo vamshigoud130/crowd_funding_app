@@ -42,11 +42,19 @@ const userSchema = new mongoose.Schema({
   }],
   referralCode: {
     type: String,
-    unique: true
+    unique: true,
+    sparse: true
   },
   isBlocked: {
     type: Boolean,
     default: false
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String
   }
 }, {
   timestamps: true
