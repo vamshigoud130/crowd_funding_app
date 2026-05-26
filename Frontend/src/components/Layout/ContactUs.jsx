@@ -13,9 +13,9 @@ const contacts = [
   { 
     icon: Mail, 
     label: "Email Us", 
-    value: "crowdspark9@gmail.com", 
+    value: "impactfunds1@gmail.com", 
     desc: "For general or complex queries, we answer in 24 hrs.",
-    href: "mailto:crowdspark9@gmail.com" 
+    href: "mailto:impactfunds1@gmail.com" 
   },
   { 
     icon: MapPin, 
