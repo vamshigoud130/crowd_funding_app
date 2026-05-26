@@ -58,7 +58,7 @@ const Register = () => {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Join the Community</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div>
             <label className="block text-sm font-medium text-gray-700">Full Name</label>
             <input
@@ -67,7 +67,9 @@ const Register = () => {
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
               placeholder="name"
+              value={formData.name}
               onChange={handleChange}
+              autoComplete="name"
             />
           </div>
 
@@ -79,7 +81,9 @@ const Register = () => {
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
               placeholder="name@example.com"
+              value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
             />
           </div>
 
@@ -91,7 +95,9 @@ const Register = () => {
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
               placeholder="••••••••"
+              value={formData.password}
               onChange={handleChange}
+              autoComplete="new-password"
             />
           </div>
 
@@ -103,7 +109,9 @@ const Register = () => {
               required
               className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-indigo-500"
               placeholder="••••••••"
+              value={formData.confirmPassword}
               onChange={handleChange}
+              autoComplete="new-password"
             />
           </div>
 
