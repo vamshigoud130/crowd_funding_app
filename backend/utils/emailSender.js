@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import nodemailer from 'nodemailer';
 
 const brandColor = '#059669';
@@ -49,6 +50,14 @@ class EmailService {
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+      }
+    });
+
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('SMTP Connection Error (check your EMAIL_USER/EMAIL_PASS):', error);
+      } else {
+        console.log('SMTP Server is ready to send emails.');
       }
     });
   }
@@ -323,7 +332,8 @@ class EmailService {
   // 9. Send verification email
   async sendVerificationEmail(email, name, token) {
     try {
-      const verifyUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email/${token}`;
+      const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const verifyUrl = `${backendUrl}/api/auth/verify-email/${token}`;
       const mailOptions = {
         from: `"${brandName}" <${process.env.EMAIL_USER}>`,
         to: email,
@@ -350,7 +360,8 @@ class EmailService {
       await this.transporter.sendMail(mailOptions);
     } catch (error) {
       console.error('Error sending email verification link:', error);
-      const verifyUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email/${token}`;
+      const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const verifyUrl = `${backendUrl}/api/auth/verify-email/${token}`;
       console.log(`\n==================================================`);
       console.log(`[DEVELOPMENT FALLBACK] Verification link for ${email}:`);
       console.log(`${verifyUrl}`);

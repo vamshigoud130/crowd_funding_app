@@ -56,11 +56,17 @@ const register = async (req, res) => {
         : 'Registration successful! Please check your email to verify your account.'
     };
 
-    // Send verification email (only if not admin)
+    // Send verification/welcome email (only if not admin)
     if (role !== 'admin') {
-      emailService.sendVerificationEmail(user.email, user.name, verificationToken).catch(err => {
-        console.error('Failed to send verification email:', err);
-      });
+      if (requireVerification) {
+        emailService.sendVerificationEmail(user.email, user.name, verificationToken).catch(err => {
+          console.error('Failed to send verification email:', err);
+        });
+      } else {
+        emailService.sendWelcomeEmail(user.email, user.name).catch(err => {
+          console.error('Failed to send welcome email:', err);
+        });
+      }
     }
 
     res.status(201).json(response);
@@ -251,6 +257,11 @@ const verifyEmail = async (req, res) => {
     user.isVerified = true;
     user.verificationToken = undefined;
     await user.save();
+
+    // Send welcome email after successful verification
+    emailService.sendWelcomeEmail(user.email, user.name).catch(err => {
+      console.error('Failed to send welcome email after verification:', err);
+    });
 
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?verified=true`);
   } catch (error) {

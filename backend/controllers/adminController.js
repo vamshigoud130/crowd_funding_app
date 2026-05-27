@@ -102,6 +102,14 @@ const releaseMilestoneFunds = async (req, res) => {
     milestone.releasedAt = new Date();
     await milestone.save();
 
+    // Send milestone update email to the campaign owner
+    const campaign = await Campaign.findById(milestone.campaignId).populate('creatorId', 'name email');
+    if (campaign && campaign.creatorId && campaign.creatorId.email) {
+      emailService.sendMilestoneUpdate(campaign.creatorId.email, campaign.title, milestone.title).catch(err => {
+        console.error('Failed to send milestone update email:', err);
+      });
+    }
+
     res.json(milestone);
   } catch (error) {
     res.status(500).json({ message: error.message });
